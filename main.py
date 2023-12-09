@@ -4,21 +4,24 @@ create : @tarickali 23/12/07
 update : @tarickali 23/12/07
 """
 
+import numpy as np
 from core import Tensor
 from core.functions import *
+from mlp import MLP
 
 
 def main():
-    x = Tensor(1)
-    y = Tensor([[2, 2, 1]])
+    net = MLP([784, 512, 512, 10])
+    x = Tensor(np.random.randn(1, 784))
 
-    t = tanh(x)
+    y = net(x)
+    print(y.grad)
+    print(x.grad)
 
-    print(t)
+    y.backward()
 
-    t.backward()
-
-    print(t.grad, x.grad)
+    print(y.grad)
+    print(x.grad)
 
 
 if __name__ == "__main__":

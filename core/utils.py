@@ -1,7 +1,7 @@
 """
 title : utils.py
 create : @tarickali 23/12/07
-update: @tarickali 23/12/07
+update: @tarickali 23/12/09
 """
 
 import numpy as np
@@ -29,7 +29,10 @@ def extend_shape(x: np.ndarray, shape: Shape) -> np.ndarray:
         if x.size == np.prod(shape):
             a = np.reshape(x, shape)
         else:
-            a = np.array(np.broadcast_to(x, shape))
+            try:
+                a = np.array(np.broadcast_to(x, shape))
+            except:
+                pass
     return a
 
 
@@ -57,8 +60,17 @@ def reduce_shape(x: np.ndarray, shape: Shape) -> np.ndarray:
             if len(shape) < 1:
                 a = np.mean(x).reshape(shape)
             else:
-                for i, ax in enumerate(np.broadcast_shapes(x.shape, shape)):
-                    if shape[i] != ax:
-                        break
-                a = np.mean(x, axis=i).reshape(shape)
+                try:
+                    broad = np.broadcast_shapes(x.shape, shape)
+                except:
+                    pass
+                else:
+                    # Get the intermediate broadcast shape by prepending 1s
+                    inter = [1] * (len(broad) - len(shape)) + list(shape)
+                    # Get the axis indices that are not the same
+                    axes = []
+                    for i in range(len(broad) - 1, -1, -1):
+                        if x.shape[i] != inter[i]:
+                            axes.append(i)
+                    a = np.mean(x, axis=tuple(axes)).reshape(shape)
     return a

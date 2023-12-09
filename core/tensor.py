@@ -1,7 +1,7 @@
 """
 title : tensor.py
 create : @tarickali 23/12/07
-update : @tarickali 23/12/07
+update : @tarickali 23/12/09
 """
 
 from __future__ import annotations
@@ -31,6 +31,9 @@ class Tensor:
         # self._forward = lambda : None
         self._backward = lambda: None
 
+    def zero_grad(self) -> None:
+        self.grad = np.zeros_like(self.grad)
+
     def backward(self) -> None:
         order = list[Tensor]()
         visited = set[Tensor]()
@@ -48,10 +51,6 @@ class Tensor:
         for x in reversed(order):
             x._backward()
 
-    def reshape(self, shape: tuple[int, ...]) -> Tensor:
-        self.data = self.data.reshape(shape)
-        self.grad = self.grad.reshape(shape)
-
     def __add__(self, other: Tensor) -> Tensor:
         if not isinstance(other, Tensor):
             raise ValueError("Cannot perform operation on non Tensor object.")
@@ -63,6 +62,24 @@ class Tensor:
             other.grad = extend_shape(other.grad, output.grad.shape)
             self.grad += output.grad
             other.grad += output.grad
+            self.grad = reduce_shape(self.grad, self.data.shape)
+            other.grad = reduce_shape(other.grad, other.data.shape)
+
+        output._backward = backward
+
+        return output
+
+    def __matmul__(self, other: Tensor) -> Tensor:
+        if not isinstance(other, Tensor):
+            raise ValueError("Cannot perform operation on non Tensor object.")
+
+        output = Tensor(data=self.data @ other.data, children=(self, other))
+
+        def backward():
+            self.grad = extend_shape(self.grad, output.grad.shape)
+            other.grad = extend_shape(other.grad, output.grad.shape)
+            self.grad += output.grad @ other.data.T
+            other.grad += self.data.T @ output.grad
             self.grad = reduce_shape(self.grad, self.data.shape)
             other.grad = reduce_shape(other.grad, other.data.shape)
 
