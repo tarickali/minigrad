@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from core import Tensor
-from core.functions import relu
+from core.functional import relu
 
 
 class Module(ABC):
