@@ -1,7 +1,7 @@
 """
-title : functions.py
+title : functional.py
 create : @tarickali 23/12/07
-udpate : @tarickali 23/12/07
+udpate : @tarickali 23/12/09
 """
 
 import numpy as np
@@ -24,7 +24,7 @@ def identity(x: Tensor) -> Tensor:
 
 
 def sigmoid(x: Tensor) -> Tensor:
-    data = 1 / (1 + np.exp(-x))
+    data = 1 / (1 + np.exp(-x.data))
     output = Tensor(data=data, children=(x,))
 
     def backward():
@@ -53,6 +53,19 @@ def tanh(x: Tensor) -> Tensor:
 
     def backward():
         x.grad += (1 - data**2) * output.grad
+
+    output._backward = backward
+
+    return output
+
+
+def softmax(x: Tensor) -> Tensor:
+    den = np.sum(x.data)
+    data = x.data / den
+    output = Tensor(data=data, children=(x,))
+
+    def backward():
+        x.grad += np.ones_like(x.data) * output.grad
 
     output._backward = backward
 
