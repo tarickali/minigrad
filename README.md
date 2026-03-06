@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ```python
 from core import Tensor
 from core.functional import relu, sigmoid
-from core import math
+import core.math as math
 from mlp import MLP
 
 # Build a small MLP
