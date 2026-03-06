@@ -1,6 +1,6 @@
 # Minigrad
 
-A minimal autograd engine and neural network library built from scratch in Python and NumPy. Minigrad implements reverse-mode automatic differentiation with a dynamic computation graph, enabling gradient-based optimization for small-scale machine learning experiments and educational use.
+A minimal autograd engine and neural network library built from scratch in Python and NumPy. Small educational project; maintained as-is. Minigrad implements reverse-mode automatic differentiation with a dynamic computation graph, enabling gradient-based optimization for small-scale machine learning experiments and educational use.
 
 ## Features
 
