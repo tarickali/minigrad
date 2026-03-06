@@ -7,7 +7,8 @@ update : @tarickali 23/12/13
 import numpy as np
 
 from core import Tensor
-from core.functional import sigmoid, softmax
+from core.functional import sigmoid, softmax, log, clip
+from core import math as cm
 
 
 def mse(y: Tensor, o: Tensor) -> Tensor:
@@ -30,7 +31,7 @@ def mse(y: Tensor, o: Tensor) -> Tensor:
 
     m, _ = y.shape
 
-    loss = sum((y - o) ** 2) / (2 * m)
+    loss = cm.sum((y - o) ** 2) / (2 * m)
     assert loss.shape == ()
 
     return loss
@@ -58,11 +59,15 @@ def binary_crossentropy(y: Tensor, o: Tensor, logits: bool = True) -> Tensor:
 
     m, _ = y.shape
 
-    if logits == True:
+    if logits is True:
         a = sigmoid(o)
-        loss = sum(-y * np.log(a) - (1 - y) * np.log(1 - a)) / m
+        one = Tensor(np.ones_like(a.data))
+        loss = cm.sum(-y * log(a) - (1 - y) * log(clip(one - a, 1e-15, 1.0))) / m
     else:
-        loss = sum(-y.data * np.log(o.data) - (1 - y.data) * np.log(1 - o.data)) / m
+        # o is already probabilities; clip for numerical stability and keep graph
+        a = clip(o, 1e-15, 1 - 1e-15)
+        one = Tensor(np.ones_like(a.data))
+        loss = cm.sum(-y * log(a) - (1 - y) * log(clip(one - a, 1e-15, 1.0))) / m
 
     assert loss.shape == ()
 
@@ -90,11 +95,13 @@ def categorical_crossentropy(y: Tensor, o: Tensor, logits: bool = True) -> Tenso
 
     assert y.shape == o.shape
 
-    if logits == True:
+    n = y.shape[0]
+    if logits is True:
         a = softmax(o)
-        loss = -np.mean(y.data * np.log(a.data))
+        loss = cm.sum(-y * log(a)) / n
     else:
-        loss = -np.mean(y.data * np.log(o.data))
+        a = clip(o, 1e-15, 1 - 1e-15)
+        loss = cm.sum(-y * log(a)) / n
     assert loss.shape == ()
 
     return loss

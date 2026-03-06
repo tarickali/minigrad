@@ -116,13 +116,14 @@ def get_batches(
 
     n = X.shape[0]
     batches = []
+    b = 0
 
     # Loop for creating batches of size m
     for i in range(n // m):
         a, b = i * m, (i + 1) * m
         batches.append((X[a:b], y[a:b]))
 
-    # Create an extra match of size < m for leftover data
+    # Create an extra batch of size < m for leftover data
     if b != n:
         batches.append((X[b:], y[b:]))
 
